@@ -1,0 +1,50 @@
+---
+
+- name: Create the RDS Subnet group (with az)
+  rds_subnet_group:
+    state: present
+    region: "{{ region }}"
+    name: "{{ rdssubnetgrp }}"
+    description: "{{ rdssubnetdesc }}"
+    subnets:
+      - "{{ subnet_inta }}"
+      - "{{ subnet_intb }}"
+      
+      
+- name: Create the core RDS DB
+  rds:
+    command: create
+    region: "{{ region }}"
+    instance_name: "{{ postgresql_coredb_name }}"
+    db_engine: "{{ dbengine }}"
+    engine_version: "{{ postgresql_version }}"
+   # copyTagsToSnapshot: True    
+    subnet: "{{ rdssubnetgrp }}"
+    multi_zone: "{{multi_zone}}"
+    size: "{{ dbsizegig }}"
+    instance_type: "{{ dbinstancetype }}"
+    username: "{{ postgresql_coredb_user }}"
+    password:  "{{ postgresql_coredb_password }}"
+    vpc_security_groups: "{{ sonarrds_grpvar.group_id }}"
+    maint_window: "{{ db_maintwin }}"
+    backup_window: "{{ db_backupwin }}"
+    backup_retention: "{{ db_backup_retention }}"
+    tags: { Name: "{{ postgresql_coredb_name }}",Project: "{{ projid }}"}
+    wait: yes
+    wait_timeout: 3600
+
+- name: List facts about the Core DB
+  rds:
+    command: facts
+    region: "{{ region }}"
+    instance_name: "{{ postgresql_coredb_name }}"
+  register: coredb
+- debug: var=coredb
+
+- name: Create core postgresql database
+  postgresql_db: login_host={{ coredb.instance.endpoint }} login_user={{ postgresql_coredb_user }} login_password={{ postgresql_coredb_password }} name={{ postgresql_coredb_name }} owner={{ postgresql_coredb_user }}
+                 encoding='UTF8' lc_collate='{{ locale }}' lc_ctype='{{ locale }}' template='template0'
+
+- name: Create extensions (main db)
+  postgresql_ext: login_host={{ coredb.instance.endpoint }} login_user={{ postgresql_coredb_user }} login_password={{ postgresql_coredb_password }} db={{ postgresql_coredb_name }} name={{ item }}
+  with_items: '{{ postgresql_extensions }}'

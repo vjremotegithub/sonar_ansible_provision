@@ -1,0 +1,39 @@
+
+---
+
+# Get AWS STS credentials to performa action as an assumed role
+- name: AWS Get STS Credentials
+  hosts: snd
+  tasks:
+    - name: AWS Get STS Credentials
+      local_action:
+       module: sts_assume_role
+       profile: "{{ sts_profile }}"
+       region: "{{ region }}"
+       role_arn: "{{ sts_role_arn }}"
+       role_session_name: "{{ sts_role_session_name }}"
+      register: assumed_role
+      when: sts
+
+    - name: Retreive STS Credentials
+      set_fact:
+         sts_aws_access_key: "{{ hostvars['localhost']['assumed_role'].sts_creds.access_key }}"
+         sts_aws_secret_key: "{{ hostvars['localhost']['assumed_role'].sts_creds.secret_key }}"
+         sts_security_token: "{{ hostvars['localhost']['assumed_role'].sts_creds.session_token }}"
+      when: sts
+    - debug: var=sts_aws_access_key
+  tags:
+     - provision_sonarqube
+
+- name: Create SonarQube
+  hosts: snd
+  gather_facts: false
+  roles: 
+    - create_sonarqube
+  environment:
+    AWS_SECRET_ACCESS_KEY: "{{ sts_aws_secret_key }}"
+    AWS_ACCESS_KEY_ID: "{{ sts_aws_access_key }}"
+    AWS_SESSION_TOKEN: "{{ sts_security_token }}"
+  tags:
+     - provision_sonarqube
+     

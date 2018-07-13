@@ -1,0 +1,51 @@
+---
+
+- name: Amend the Sonar Security Group
+  ec2_group:
+    name: "{{ sonar_grpid }}" 
+    description: "{{ sonar_grpdesc }}" 
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        from_port: "{{ ssh }}"
+        to_port: "{{ ssh }}"
+        group_id: "{{ ansible_prov_server_sgid }}"
+      - proto: tcp
+        from_port: "{{ sonar_https_port }}"
+        to_port: "{{ sonar_https_port }}"
+        cidr_ip: "{{openvpn_ip }}"
+      - proto: tcp
+        from_port: "{{ sonar_http_port }}"
+        to_port: "{{ sonar_http_port }}"
+        cidr_ip: "{{ openvpn_ip }}"
+        
+    rules_egress:
+      - proto: tcp
+        from_port: "{{ prx_port }}"
+        to_port: "{{ prx_port }}"
+        group_id: "{{ prx_sgid }}"
+      - proto: tcp
+        from_port: "{{ rds_port }}"
+        to_port: "{{ rds_port }}"
+        group_id: "{{ sonarrds_grpvar.group_id }}"
+      - proto: tcp
+        from_port: "0"
+        to_port: "65535"
+        cidr_ip: "{{ allowall }}"
+                
+- name: Amend the RDS  Security Group
+  ec2_group:
+    name: "{{ sonarrds_grpid }}" 
+    description: "{{ sonarrds_grpdesc }}" 
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        from_port: "{{ rds_port }}"
+        to_port: "{{ rds_port }}"
+        group_id: "{{sonar_grpvar.group_id}}"
+      - proto: tcp
+        from_port: "{{ rds_port }}"
+        to_port: "{{ rds_port }}"
+        group_id: "{{ ansible_prov_server_sgid }}"

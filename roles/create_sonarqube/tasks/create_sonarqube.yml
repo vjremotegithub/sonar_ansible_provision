@@ -1,0 +1,19 @@
+---
+
+- name: Create the SonarQube Instance
+  ec2:
+    region: "{{ region }}"
+    image: "{{ image_id }}"
+    vpc_subnet_id: "{{ subnet_exta }}"
+    instance_type: "{{image_type }}"
+    key_name: "{{ key }}"
+    group_id: "{{ sonar_grpvar.group_id }}"
+    instance_tags: { Name: "{{ sonar_instance_name }}",Project: "{{ projid }}"  }
+    user_data: "{{ sonar_instance_name }}"
+    exact_count: 1
+    count_tag: { Name: "{{ sonar_instance_name }}" }
+    assign_public_ip: yes
+    wait: yes
+    wait_timeout: 3600
+  register: sonar_ec2
+- debug: var=sonar_ec2

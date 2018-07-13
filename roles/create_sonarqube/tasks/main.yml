@@ -1,0 +1,8 @@
+---
+
+# Create IAM policies and Roles
+#- include: common.yml
+- include: create_security_groups.yml
+- include: amend_security_groups.yml
+#- include: create_postgres.yml
+- include: create_sonarqube.yml

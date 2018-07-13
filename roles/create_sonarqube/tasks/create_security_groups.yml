@@ -1,0 +1,26 @@
+---
+##Set Date/Time variable
+- name: new variable with current date time
+  set_fact: date_time_tag="{{lookup('pipe','date \"+%Y%m%d-%H%M%S\"')}}"
+  
+  
+- name: Create Sonar Security Group
+  ec2_group:
+    name: "{{ sonar_grpid }}" 
+    description: "{{ sonar_grpdesc }}" 
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    tags: {  Name: "{{ sonar_grpid }}", Project: "{{ projid }}", CreationDateTime: "{{ date_time_tag }}"}
+  register: sonar_grpvar
+- debug: var=sonar_grpvar
+
+- name: Create RDS Security Group
+  ec2_group:
+    name: "{{ sonarrds_grpid }}" 
+    description: "{{ sonarrds_grpdesc }}" 
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    tags: {  Name: "{{ sonarrds_grpid }}", Project: "{{ projid }}", CreationDateTime: "{{ date_time_tag }}"}
+  register: sonarrds_grpvar
+- debug: var=sonarrds_grpvar
+

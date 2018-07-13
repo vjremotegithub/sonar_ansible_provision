@@ -1,0 +1,60 @@
+---
+#STS
+
+sts: true
+sts_role_arn: "arn:aws:iam::*****:role/PoloAdmin"
+sts_profile: "polo-profile" 
+sts_role_session_name: "polo-profile"
+
+#Shared
+
+projid: SONARQUBE
+region: eu-west-1
+vpc_id: vpc-****
+subnet_inta:  ***
+subnet_intb: ***
+subnet_exta: ***
+subnet_extb: ***
+
+  
+# Security Groups
+prx_sgid: sg-*****
+prx_port: 3128
+rds_port: 5432
+allowall: 0.0.0.0/0
+ssh: 22
+openvpn_ip: *****/32
+ansible_prov_server_sgid: *****
+vpn_sgid: *****
+
+sonar_grpid: SONARGRP001
+sonar_grpdesc: SonarQube Security Group
+sonarrds_grpid: SONARRDSGRP001
+sonarrds_grpdesc:  SonarQube RDS Security Group
+
+#RDS
+rdssubnetgrp: SONARRDSGRP001
+rdssubnetdesc: "SONAR RDS Subnet Group"
+locale: en_GB.UTF-8
+dbengine: postgres
+dbsizegig: 5
+dbinstancetype: db.m1.small
+postgresql_coredb_name: sonarqube
+db_maintwin: "Sun:01:00-Sun:02:00"
+db_backupwin: "02:01-03:01"
+db_backup_retention: 14
+postgresql_coredb_user: sonar
+postgresql_coredb_password: ******
+postgresql_extensions:
+  - hstore
+  - citext
+postgresql_version: 9.4
+multi_zone: no
+
+# SonarQube EC2
+key: SONARKP001
+sonar_instance_name: SONARQUBESRV001
+image_id: ****
+image_type: t2.large
+sonar_http_port: 9000
+sonar_https_port: 443
